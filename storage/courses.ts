@@ -52,6 +52,6 @@ export const useCoursesStore = defineStore('coursesStore', () => {
             if (!colors.value) {
                 colors.value = await $fetch('/api/colors')
             }
-        }
+        },
     }
 })

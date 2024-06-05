@@ -1,24 +1,35 @@
 <script lang="ts" setup>
-import {useCoursesStore} from "~/storage/courses";
 import FormAddCourses from "~/components/form-add-courses.vue";
+import {useCoursesStore} from "~/storage/courses";
+import {useAdminStore} from "~/storage/admin";
+import type {Course} from "~/server/types";
 // import {Course} from "~/server/types";
 
 definePageMeta({
   title: 'Админ панель'
 })
-const store = useCoursesStore()
+const coursesStore = useCoursesStore()
+const adminStore = useAdminStore()
 
 const {data, pending} = useAsyncData('coursesListData', async () => {
   await Promise.all([
-      store.fetchCourses(),
-      store.fetchCategories(),
-      store.fetchColors()
+      coursesStore.fetchCourses(),
+      coursesStore.fetchCategories(),
+      coursesStore.fetchColors()
   ])
   return {
-    courses: store.courses,
-    categories: store.categories
+    courses: coursesStore.courses,
+    categories: coursesStore.categories
   }
 })
+const save = async (value: Course) => {
+  console.log('НОВЫЙ_КУРС', value);
+  await adminStore.addCourse(value)
+  await coursesStore.fetchCourses()
+}
+// watch(data, () => {
+//   console.log(data)
+// })
 </script>
 
 <template>
@@ -39,7 +50,7 @@ const {data, pending} = useAsyncData('coursesListData', async () => {
         <h3 class="block-form__title">Форма</h3>
         <div class="block-form__content">
           <div v-if="pending">loading form...</div>
-          <FormAddCourses v-else :categories="data.categories" />
+          <FormAddCourses @save="save" v-else :categories="data.categories" />
         </div>
       </div>
     </div>

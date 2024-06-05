@@ -1,45 +1,36 @@
 <script setup lang="ts">
-import {ref} from 'vue'
+import { ref } from 'vue'
 import type {Category, Course} from "@/server/types";
-import {useAdminStore} from "@/storage/admin";
-import {useCoursesStore} from "~/storage/courses";
 
 const props = defineProps<{
   categories: Category[]
 }>()
 
-const courseStore = useCoursesStore()
-const adminStore = useAdminStore()
+const emit = defineEmits(["save"])
 
-const courseId = ref<number>(courseStore.courses.length)
-const courseName = ref<string>('')
-const courseCategoryId = ref<number>(0)
+const newCourse = ref<Course>({
+  id: 0,
+  name: '',
+  categoryId: 0
+})
 
-const save = () => {
-
-  let course = new Object({
-    id: courseId.value,
-    name: courseName.value,
-    categoryId: courseCategoryId.value
-  })
-
-  console.log('НОВЫЙ_КУРС', course);
-
-  adminStore.addCourse(course)
-
-  courseId.value = 0
-  courseName.value = ''
-  courseCategoryId.value = 0
-
+const submitForm = () => {
+  // console.log('НОВЫЙ_КУРС', newCourse.value);
+  emit("save", newCourse.value)
+  newCourse.value = {
+    id: 0,
+    name: '',
+    categoryId: 0
+  }
 }
 </script>
 
 <template>
-  <div class="form">
+  <form class="form" @submit.prevent="submitForm">
     <div class="form__fields">
       <div class="form__field">
         <label for="form-field-name" class="form__label">Название</label>
-        <input v-model="courseName" id="form-field-name" name="name" type="text" class="form__input"/>
+        <input v-model="newCourse.name" id="form-field-name" name="name" type="text" class="form__input"/>
       </div>
       <div class="form__field">
         <label for="" class="form__label">Категория</label>
@@ -47,7 +38,7 @@ const save = () => {
           <div class="form__radio" v-for="item in categories" :key="item.id">
             <input
                 :id="'form-field-radio-' + item.id"
-                v-model="courseCategoryId"
+                v-model="newCourse.categoryId"
                 :value="item.id"
                 name="radios"
                 type="radio"
@@ -59,12 +50,11 @@ const save = () => {
       </div>
       <div class="form__actions">
         <button
-            @click="save"
             class="form__submit"
         >Готово</button>
       </div>
     </div>
-  </div>
+  </form>
 </template>
 
 <style scoped>
